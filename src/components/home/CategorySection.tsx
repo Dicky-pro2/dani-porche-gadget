@@ -11,7 +11,7 @@ export function CategorySection() {
         <div className="category-grid">
           {categories.map((category) => (
             <Link className="category-card" to={`/shop?category=${encodeURIComponent(category.name)}`} key={category.name}>
-              <img src={imageUrl(category.image, 520)} alt="" loading="lazy" />
+              <img src={imageUrl(category.image, 520)} alt="" width="520" height="347" loading="lazy" />
               <span>{category.name}</span>
             </Link>
           ))}

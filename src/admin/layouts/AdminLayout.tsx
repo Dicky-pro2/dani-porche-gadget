@@ -29,7 +29,7 @@ export function AdminLayout() {
           <nav className="admin-nav" aria-label="Admin navigation">
             {navItems.map(({ label, path, icon: Icon, end }) => <NavLink key={path} to={path} end={end}><Icon size={15} />{label}</NavLink>)}
           </nav>
-          <button className="admin-nav" style={{ marginTop: 'auto', border: 0, background: 'transparent', cursor: 'pointer', textAlign: 'left' }} onClick={signOut}><span style={{ display: 'flex', gap: 11, alignItems: 'center', color: '#c3d0c4', fontSize: 10, padding: 10 }}><LogOut size={15} />Exit preview</span></button>
+          <button className="admin-signout" onClick={signOut}><LogOut size={15} />Exit preview</button>
         </aside>
         <main className="admin-content">
           <header className="admin-topbar"><p>Store administration</p><span>Prototype mode · local preview only</span></header>

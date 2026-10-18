@@ -58,8 +58,8 @@ export function HeroSection() {
         </div>
         <div className="hero-visual" role="region" aria-label="Featured products" aria-roledescription="carousel">
           <div className="hero-disc" />
-          <img className={`hero-device${nextIndex !== null ? ' is-falling' : ''}`} src={activeProduct.image} alt={activeProduct.name} fetchPriority="high" />
-          {nextIndex !== null && <img className="hero-device is-arriving" src={slides[nextIndex].image} alt="" aria-hidden="true" />}
+          <img className={`hero-device${nextIndex !== null ? ' is-falling' : ''}`} src={activeProduct.image} alt={activeProduct.name} width="900" height="600" fetchPriority="high" />
+          {nextIndex !== null && <img className="hero-device is-arriving" src={slides[nextIndex].image} alt="" width="900" height="600" aria-hidden="true" />}
           <div className="hero-note"><strong>Made for your everyday</strong>Thoughtful tech, selected with care</div>
         </div>
       </div>

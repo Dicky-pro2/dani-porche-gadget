@@ -9,7 +9,7 @@ export function ProductCard({ product }: { product: Product }) {
     <article className="product-card">
       <Link className="product-image-wrap" to={productPath(product.slug)} aria-label={`View ${product.name}`}>
         {product.badge && <span className="product-label">{product.badge}</span>}
-        <img src={product.image} alt={product.name} loading="lazy" />
+        <img src={product.image} alt={product.name} width="900" height="600" loading="lazy" />
       </Link>
       <div className="product-meta">
         <div className="product-brand">{product.brand}</div>

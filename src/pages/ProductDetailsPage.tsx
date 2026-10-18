@@ -11,14 +11,14 @@ export function ProductDetailsPage() {
   const product = getProduct(slug)
   const [variant, setVariant] = useState('')
   const [quantity, setQuantity] = useState(1)
-  if (!product) return <Container><div className="empty-state" style={{ margin: '50px auto' }}>This sample product could not be found. <Link to="/shop">Return to the shop.</Link></div></Container>
+  if (!product) return <Container><div className="empty-state product-not-found">This sample product could not be found. <Link to="/shop">Return to the shop.</Link></div></Container>
   const related = products.filter((item) => item.slug !== product.slug && item.category === product.category).slice(0, 4)
   return (
     <>
       <Container>
-        <div className="breadcrumb" style={{ paddingTop: 27 }}><Link to="/shop"><ArrowLeft size={12} /> Shop</Link><ChevronRight size={12} /> {product.name}</div>
+        <div className="breadcrumb detail-breadcrumb"><Link to="/shop"><ArrowLeft size={12} /> Shop</Link><ChevronRight size={12} /> {product.name}</div>
         <div className="detail-layout">
-          <div className="detail-image"><img src={product.image} alt={product.name} /></div>
+          <div className="detail-image"><img src={product.image} alt={product.name} width="900" height="600" /></div>
           <div className="detail-copy">
             <div className="section-kicker">{product.brand} · sample listing</div>
             <h1>{product.name}</h1>
@@ -32,7 +32,7 @@ export function ProductDetailsPage() {
             <div className="filter-group"><h3>Product details</h3>{product.specs.map((spec) => <div className="filter-option" key={spec}><Check size={13} /> {spec}</div>)}</div>
           </div>
         </div>
-        {related.length > 0 && <section className="section products-section"><div className="section-kicker">Keep exploring</div><h2 style={{ font: '700 24px var(--font-display)', margin: '0 0 22px' }}>You may also like</h2><ProductGrid products={related} /></section>}
+        {related.length > 0 && <section className="section products-section"><div className="section-kicker">Keep exploring</div><h2 className="related-heading">You may also like</h2><ProductGrid products={related} /></section>}
       </Container>
     </>
   )

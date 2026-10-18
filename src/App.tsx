@@ -14,6 +14,8 @@ import { ProductDetailsPage } from './pages/ProductDetailsPage'
 import { ShopPage } from './pages/ShopPage'
 import { SupportPage } from './pages/SupportPage'
 import { routes } from './constants/routes'
+import { RouteMetadata } from './components/common/RouteMetadata'
+import { RouteScrollManager } from './components/common/RouteScrollManager'
 import './App.css'
 
 function StorefrontLayout() {
@@ -39,6 +41,8 @@ function App() {
   return (
     <BrowserRouter>
       <AdminAuthProvider>
+        <RouteScrollManager />
+        <RouteMetadata />
         <Routes>
           <Route path={routes.adminLogin} element={<AdminLoginPage />} />
           <Route

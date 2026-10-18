@@ -19,7 +19,7 @@ export function AdminLoginPage() {
         <p>Explore the dashboard interface in prototype mode. This preview does not connect to a database or authenticate a real administrator.</p>
         <button className="button button-primary" onClick={openPreview}><LockKeyhole size={15} /> ENTER DESIGN PREVIEW</button>
         <div className="admin-warning">Production admin access is intentionally unavailable until Supabase authentication, role-based authorization, and backend data policies are configured. This preview gate is not a security boundary.</div>
-        <Link className="text-link" style={{ marginTop: 20 }} to="/"><ArrowLeft size={13} /> BACK TO STOREFRONT</Link>
+        <Link className="text-link admin-back-link" to="/"><ArrowLeft size={13} /> BACK TO STOREFRONT</Link>
       </section>
     </main>
   )

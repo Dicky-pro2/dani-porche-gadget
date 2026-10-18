@@ -5,6 +5,8 @@ export const siteConfig = {
   prototypeLabel: 'Design preview · sample catalogue',
 }
 
+export const siteOrigin = (import.meta.env.VITE_SITE_URL || 'https://daniporshegadget.example').replace(/\/+$/, '')
+
 export const categories = [
   { name: 'Smartphones', image: 'photo-1511707171634-5f897ff02aa9' },
   { name: 'Laptops & tablets', image: 'photo-1496181133206-80ce9b88a853' },
