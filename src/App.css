@@ -50,7 +50,8 @@
 .hero-pagination button { width: 18px; height: 14px; padding: 0; border: 0; background: linear-gradient(transparent 5px, #cbd5c9 5px, #cbd5c9 8px, transparent 8px); cursor: pointer; transition: width .2s ease; }
 .hero-pagination button.is-active { width: 32px; background: linear-gradient(transparent 5px, var(--forest) 5px, var(--forest) 8px, transparent 8px); }
 .hero-pagination span { margin-left: 7px; font-size: 9px; color: #798179; }
-.ticker { min-height: 68px; border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: center; gap: clamp(20px, 5vw, 73px); padding: 16px 24px; color: #666f67; }
+.ticker { min-height: 68px; border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: center; gap: clamp(20px, 5vw, 73px); padding: 16px 24px; color: #666f67; scrollbar-width: none; }
+.ticker::-webkit-scrollbar { display: none; }
 .ticker span { font-size: 9px; letter-spacing: .45px; display: flex; align-items: center; gap: 9px; }
 .ticker svg { color: #78977a; }
 .section { padding: 82px 0; }
