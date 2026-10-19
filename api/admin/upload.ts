@@ -66,7 +66,7 @@ export default async function handler(request: IncomingMessage, response: Server
     const safeName = typeof fileName === 'string' && /^[a-zA-Z0-9._-]{1,100}$/.test(fileName)
       ? fileName
       : `product.${detectedType.split('/')[1]}`
-    const file = new File([bytes], safeName, { type: detectedType })
+    const file = new File([Uint8Array.from(bytes)], safeName, { type: detectedType })
     const uploaded = await uploadFile(getCocobaseClient(), file)
     const url = new URL(uploaded.url)
     if (url.protocol !== 'https:') throw new Error('Invalid storage URL.')
