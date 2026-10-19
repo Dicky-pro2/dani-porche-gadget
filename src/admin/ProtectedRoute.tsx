@@ -4,7 +4,8 @@ import { useAdminAuth } from './AdminAuthContext'
 import { routes } from '../constants/routes'
 
 export function ProtectedRoute({ children }: { children?: ReactNode }) {
-  const { isPreviewAuthenticated } = useAdminAuth()
-  if (!isPreviewAuthenticated) return <Navigate to={routes.adminLogin} replace />
+  const { isAuthenticated, loading } = useAdminAuth()
+  if (loading) return <div className="admin-loading" role="status">Checking sign-in…</div>
+  if (!isAuthenticated) return <Navigate to={routes.adminLogin} replace />
   return children ?? <Outlet />
 }

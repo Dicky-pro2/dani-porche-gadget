@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { productPath } from '../../constants/routes'
 import type { Product } from '../../data/products'
 import { WhatsAppOrderButton } from './WhatsAppOrderButton'
+import { formatPrice, stockLabel } from '../../services/whatsappService'
 
 export function ProductCard({ product }: { product: Product }) {
   return (
@@ -14,8 +15,8 @@ export function ProductCard({ product }: { product: Product }) {
       <div className="product-meta">
         <div className="product-brand">{product.brand}</div>
         <Link to={productPath(product.slug)} className="product-name">{product.name}</Link>
-        <div className="product-price">Price on request</div>
-        <div className="prototype-note">Sample listing · confirm price & availability</div>
+        <div className="product-price">{formatPrice(product.price)}</div>
+        <div className={`prototype-note stock-label${product.stock <= 3 ? ' is-low' : ''}`}>{stockLabel(product.stock)}</div>
         <div className="card-actions">
           <WhatsAppOrderButton compact product={product} />
           <Link className="icon-button" to={productPath(product.slug)} aria-label={`View ${product.name}`}><ArrowUpRight size={15} /></Link>

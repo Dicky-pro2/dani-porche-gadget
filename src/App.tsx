@@ -1,9 +1,6 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import { lazy, Suspense } from 'react'
 import { AdminAuthProvider } from './admin/AdminAuth'
-import { AdminLayout } from './admin/layouts/AdminLayout'
-import { AdminDashboardPage } from './admin/pages/AdminDashboardPage'
-import { AdminLoginPage } from './admin/pages/AdminLoginPage'
-import { AdminManagementPage } from './admin/pages/AdminManagementPage'
 import { ProtectedRoute } from './admin/ProtectedRoute'
 import { Footer } from './components/layout/Footer'
 import { Navbar } from './components/layout/Navbar'
@@ -16,7 +13,15 @@ import { SupportPage } from './pages/SupportPage'
 import { routes } from './constants/routes'
 import { RouteMetadata } from './components/common/RouteMetadata'
 import { RouteScrollManager } from './components/common/RouteScrollManager'
+import { ProductsProvider } from './context/ProductsContext'
 import './App.css'
+
+const AdminLayout = lazy(() => import('./admin/layouts/AdminLayout').then((module) => ({ default: module.AdminLayout })))
+const AdminDashboardPage = lazy(() => import('./admin/pages/AdminDashboardPage').then((module) => ({ default: module.AdminDashboardPage })))
+const AdminLoginPage = lazy(() => import('./admin/pages/AdminLoginPage').then((module) => ({ default: module.AdminLoginPage })))
+const AdminManagementPage = lazy(() => import('./admin/pages/AdminManagementPage').then((module) => ({ default: module.AdminManagementPage })))
+const AdminProductsPage = lazy(() => import('./admin/pages/AdminProductsPage').then((module) => ({ default: module.AdminProductsPage })))
+const AdminProductFormPage = lazy(() => import('./admin/pages/AdminProductFormPage').then((module) => ({ default: module.AdminProductFormPage })))
 
 function StorefrontLayout() {
   return (
@@ -41,27 +46,31 @@ function App() {
   return (
     <BrowserRouter>
       <AdminAuthProvider>
-        <RouteScrollManager />
-        <RouteMetadata />
-        <Routes>
-          <Route path={routes.adminLogin} element={<AdminLoginPage />} />
-          <Route
-            path={routes.admin}
-            element={
-              <ProtectedRoute>
-                <AdminLayout />
-              </ProtectedRoute>
-            }
-          >
-            <Route index element={<AdminDashboardPage />} />
-            <Route path={routes.adminProducts} element={<AdminManagementPage section="Products" />} />
-            <Route path={routes.adminCategories} element={<AdminManagementPage section="Categories" />} />
-            <Route path={routes.adminInventory} element={<AdminManagementPage section="Inventory" />} />
-            <Route path={routes.adminOrders} element={<AdminManagementPage section="Orders" />} />
-            <Route path={routes.adminReports} element={<AdminManagementPage section="Reports" />} />
-          </Route>
-          <Route path="/*" element={<StorefrontLayout />} />
-        </Routes>
+        <ProductsProvider>
+          <RouteScrollManager />
+          <RouteMetadata />
+          <Routes>
+            <Route path={routes.adminLogin} element={<Suspense fallback={<div className="admin-loading">Loading…</div>}><AdminLoginPage /></Suspense>} />
+            <Route
+              path={routes.admin}
+              element={
+                <ProtectedRoute>
+                  <Suspense fallback={<div className="admin-loading">Loading…</div>}><AdminLayout /></Suspense>
+                </ProtectedRoute>
+              }
+            >
+              <Route index element={<Suspense fallback={<div className="admin-loading">Loading…</div>}><AdminDashboardPage /></Suspense>} />
+              <Route path={routes.adminProducts} element={<Suspense fallback={<div className="admin-loading">Loading…</div>}><AdminProductsPage /></Suspense>} />
+              <Route path={`${routes.adminProducts}/new`} element={<Suspense fallback={<div className="admin-loading">Loading…</div>}><AdminProductFormPage /></Suspense>} />
+              <Route path={`${routes.adminProducts}/:id`} element={<Suspense fallback={<div className="admin-loading">Loading…</div>}><AdminProductFormPage /></Suspense>} />
+              <Route path={routes.adminCategories} element={<Suspense fallback={<div className="admin-loading">Loading…</div>}><AdminManagementPage section="Categories" /></Suspense>} />
+              <Route path={routes.adminInventory} element={<Suspense fallback={<div className="admin-loading">Loading…</div>}><AdminManagementPage section="Inventory" /></Suspense>} />
+              <Route path={routes.adminOrders} element={<Suspense fallback={<div className="admin-loading">Loading…</div>}><AdminManagementPage section="Orders" /></Suspense>} />
+              <Route path={routes.adminReports} element={<Suspense fallback={<div className="admin-loading">Loading…</div>}><AdminManagementPage section="Reports" /></Suspense>} />
+            </Route>
+            <Route path="/*" element={<StorefrontLayout />} />
+          </Routes>
+        </ProductsProvider>
       </AdminAuthProvider>
     </BrowserRouter>
   )

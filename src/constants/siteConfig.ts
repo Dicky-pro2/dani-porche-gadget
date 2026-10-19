@@ -1,11 +1,14 @@
 export const siteConfig = {
   name: 'Dani Porshe Gadget',
   whatsappNumber: '',
-  contactEmail: 'hello@daniporshegadget.example',
-  prototypeLabel: 'Design preview · sample catalogue',
+  contactEmail: '',
 }
 
-export const siteOrigin = (import.meta.env.VITE_SITE_URL || 'https://daniporshegadget.example').replace(/\/+$/, '')
+export const siteOrigin = (import.meta.env.VITE_SITE_URL || 'https://dani-porche-gadget.vercel.app').replace(/\/+$/, '')
+
+export const isWhatsAppConfigured = () => Boolean(siteConfig.whatsappNumber.replace(/\D/g, ''))
+export const isContactEmailConfigured = () =>
+  Boolean(siteConfig.contactEmail && !siteConfig.contactEmail.toLowerCase().endsWith('.example'))
 
 export const categories = [
   { name: 'Smartphones', image: 'photo-1511707171634-5f897ff02aa9' },

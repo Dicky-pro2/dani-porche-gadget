@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://daniporshegadget.example/sitemap.xml
+Sitemap: https://dani-porche-gadget.vercel.app/sitemap.xml

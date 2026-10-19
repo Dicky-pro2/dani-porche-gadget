@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
-import { getProduct } from '../../data/products'
 import { siteConfig, siteOrigin } from '../../constants/siteConfig'
+import { useProduct } from '../../hooks/useProduct'
 
 const defaultDescription = 'Thoughtfully selected smartphones, gadgets, and everyday tech from Dani Porshe Gadget.'
 
@@ -17,19 +17,20 @@ function setMeta(attribute: 'name' | 'property', key: string, content: string) {
 
 export function RouteMetadata() {
   const { pathname } = useLocation()
+  const productMatch = pathname.match(/^\/products\/([^/]+)$/)
+  const productSlug = productMatch ? decodeURIComponent(productMatch[1]) : ''
+  const { product } = useProduct(productSlug)
 
   useEffect(() => {
     const isAdmin = pathname === '/admin' || pathname.startsWith('/admin/')
-    const productMatch = pathname.match(/^\/products\/([^/]+)$/)
-    const product = productMatch ? getProduct(decodeURIComponent(productMatch[1])) : undefined
     const pages: Record<string, { title: string; description: string }> = {
       '/': { title: 'Tech that moves you', description: defaultDescription },
-      '/shop': { title: 'Shop electronics & gadgets', description: 'Browse the sample smartphone, audio, laptop, smartwatch, and accessory collection from Dani Porshe Gadget.' },
+      '/shop': { title: 'Shop electronics & gadgets', description: 'Browse smartphones, audio, laptops, smartwatches, and accessories from Dani Porshe Gadget.' },
       '/about': { title: 'About us', description: 'Learn about Dani Porshe Gadget and our thoughtful approach to choosing everyday technology.' },
       '/support': { title: 'Support & contact', description: 'Ask Dani Porshe Gadget about products, availability, and how to order.' },
     }
     const page = isAdmin
-      ? { title: 'Admin preview', description: 'Administration design preview for Dani Porshe Gadget.' }
+      ? { title: 'Admin', description: 'Store administration for Dani Porshe Gadget.' }
       : product
         ? { title: product.name, description: product.description }
         : pages[pathname] ?? { title: 'Page not found', description: 'The requested Dani Porshe Gadget page could not be found.' }
@@ -54,7 +55,7 @@ export function RouteMetadata() {
       document.head.append(canonical)
     }
     canonical.href = canonicalUrl
-  }, [pathname])
+  }, [pathname, product])
 
   return null
 }

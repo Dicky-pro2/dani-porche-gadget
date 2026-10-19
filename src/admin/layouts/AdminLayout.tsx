@@ -1,5 +1,6 @@
 import { BarChart3, Boxes, ClipboardList, LayoutDashboard, LogOut, Package, Tags } from 'lucide-react'
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
+import { useState } from 'react'
 import { useAdminAuth } from '../AdminAuthContext'
 import { routes } from '../../constants/routes'
 import { BrandLogo } from '../../components/common/BrandLogo'
@@ -14,25 +15,32 @@ const navItems = [
 ]
 
 export function AdminLayout() {
-  const { exitPreview } = useAdminAuth()
+  const { signOut, userEmail } = useAdminAuth()
   const navigate = useNavigate()
-  const signOut = () => {
-    exitPreview()
-    navigate(routes.adminLogin)
+  const [error, setError] = useState<string | null>(null)
+  const handleSignOut = async () => {
+    setError(null)
+    try {
+      await signOut()
+      navigate(routes.adminLogin, { replace: true })
+    } catch {
+      setError('Unable to sign out. Please try again.')
+    }
   }
+
   return (
     <div className="admin-screen">
       <div className="admin-frame">
         <aside className="admin-sidebar">
           <BrandLogo />
-          <div className="admin-preview">DESIGN PREVIEW<br />No live shop data connected.</div>
           <nav className="admin-nav" aria-label="Admin navigation">
             {navItems.map(({ label, path, icon: Icon, end }) => <NavLink key={path} to={path} end={end}><Icon size={15} />{label}</NavLink>)}
           </nav>
-          <button className="admin-signout" onClick={signOut}><LogOut size={15} />Exit preview</button>
+          <button className="admin-signout" onClick={handleSignOut}><LogOut size={15} />Sign out</button>
         </aside>
         <main className="admin-content">
-          <header className="admin-topbar"><p>Store administration</p><span>Prototype mode · local preview only</span></header>
+          <header className="admin-topbar"><p>Store administration</p><span>{userEmail}</span></header>
+          {error && <p className="admin-error" role="alert">{error}</p>}
           <Outlet />
         </main>
       </div>

@@ -1,9 +1,11 @@
 import { createContext, useContext } from 'react'
 
 export type AdminAuthValue = {
-  isPreviewAuthenticated: boolean
-  enterPreview: () => void
-  exitPreview: () => void
+  loading: boolean
+  userEmail: string | null
+  isAuthenticated: boolean
+  signIn: (email: string, password: string) => Promise<string | null>
+  signOut: () => Promise<void>
 }
 
 export const AdminAuthContext = createContext<AdminAuthValue | null>(null)

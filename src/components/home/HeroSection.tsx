@@ -1,11 +1,12 @@
 import { ArrowRight } from 'lucide-react'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { products } from '../../data/products'
+import { useProducts } from '../../hooks/useProducts'
 import { Button } from '../common/Button'
 
 export function HeroSection() {
-  const slides = products.slice(0, 3)
+  const { products } = useProducts()
+  const slides = useMemo(() => products.slice(0, 3), [products])
   const [activeIndex, setActiveIndex] = useState(0)
   const [nextIndex, setNextIndex] = useState<number | null>(null)
   const isTransitioning = useRef(false)
@@ -29,7 +30,7 @@ export function HeroSection() {
     let interval: number | null = null
     const syncAutoplay = () => {
       if (interval !== null) window.clearInterval(interval)
-      interval = motionPreference.matches
+      interval = motionPreference.matches || slides.length < 2
         ? null
         : window.setInterval(() => showSlide((activeIndexRef.current + 1) % slides.length), 5200)
     }
@@ -42,7 +43,7 @@ export function HeroSection() {
     }
   }, [showSlide, slides.length])
 
-  const activeProduct = slides[activeIndex]
+  const activeProduct = slides[activeIndex] ?? slides[0]
 
   return (
     <section className="hero">
@@ -58,12 +59,12 @@ export function HeroSection() {
         </div>
         <div className="hero-visual" role="region" aria-label="Featured products" aria-roledescription="carousel">
           <div className="hero-disc" />
-          <img className={`hero-device${nextIndex !== null ? ' is-falling' : ''}`} src={activeProduct.image} alt={activeProduct.name} width="900" height="600" fetchPriority="high" />
-          {nextIndex !== null && <img className="hero-device is-arriving" src={slides[nextIndex].image} alt="" width="900" height="600" aria-hidden="true" />}
+          {activeProduct && <img className={`hero-device${nextIndex !== null ? ' is-falling' : ''}`} src={activeProduct.image} alt={activeProduct.name} width="900" height="600" fetchPriority="high" />}
+          {nextIndex !== null && slides[nextIndex] && <img className="hero-device is-arriving" src={slides[nextIndex].image} alt="" width="900" height="600" aria-hidden="true" />}
           <div className="hero-note"><strong>Made for your everyday</strong>Thoughtful tech, selected with care</div>
         </div>
       </div>
-      <div className="hero-pagination" aria-label="Choose featured product">
+      {slides.length > 0 && <div className="hero-pagination" aria-label="Choose featured product">
         {slides.map((product, index) => (
           <button
             aria-label={`Show ${product.name}`}
@@ -75,7 +76,7 @@ export function HeroSection() {
           />
         ))}
         <span>{String(activeIndex + 1).padStart(2, '0')} / {String(slides.length).padStart(2, '0')}</span>
-      </div>
+      </div>}
     </section>
   )
 }
