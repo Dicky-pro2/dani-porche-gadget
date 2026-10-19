@@ -1,4 +1,5 @@
 import { uploadFile } from 'cocobase'
+import { Buffer } from 'node:buffer'
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import { verifyAdminSessionOrRespond } from '../lib/auth.js'
 import { getCocobaseClient } from '../lib/cocobase.js'
