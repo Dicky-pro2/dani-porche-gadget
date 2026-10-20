@@ -1,7 +1,13 @@
 import type { IncomingMessage, ServerResponse } from 'node:http'
-import { CocobaseError } from 'cocobase'
-import { authenticateAdmin, adminUserResponse, recordFailedLogin, setSessionCookie, loginIsRateLimited } from '../../server/auth.js'
+import { authenticateAdmin, adminUserResponse, recordFailedLogin, setSessionCookies, loginIsRateLimited } from '../../server/auth.js'
 import { hasAllowedOrigin, readJson, requestIp, requireJson, sendJson } from '../../server/http.js'
+
+function statusOf(error: unknown) {
+  if (typeof error === 'object' && error !== null && 'status' in error && typeof error.status === 'number') {
+    return error.status
+  }
+  return null
+}
 
 export default async function handler(request: IncomingMessage, response: ServerResponse) {
   response.setHeader('Cache-Control', 'no-store')
@@ -47,16 +53,18 @@ export default async function handler(request: IncomingMessage, response: Server
   }
 
   try {
-    const { user, token } = await authenticateAdmin(data.email.trim(), data.password)
-    setSessionCookie(response, token)
+    const { user, accessToken, refreshToken, expiresIn } = await authenticateAdmin(data.email.trim(), data.password)
+    setSessionCookies(response, accessToken, refreshToken, expiresIn)
     sendJson(response, 200, { user: adminUserResponse(user) })
   } catch (error) {
-    if (error instanceof CocobaseError && error.statusCode === 429) {
+    const status = statusOf(error)
+    if (status === 429) {
       sendJson(response, 429, { error: 'Too many sign-in attempts. Try again later.' })
       return
     }
     const invalidCredentials = error instanceof Error && error.message === 'Authentication failed.'
-      || error instanceof CocobaseError && error.statusCode === 401
+      || status === 400
+      || status === 401
     if (!invalidCredentials) {
       console.error('Admin sign-in failed:', error)
       sendJson(response, 502, { error: 'Unable to sign in right now.' })

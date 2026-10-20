@@ -1,51 +1,70 @@
-import type { AppUser } from 'cocobase'
-import { CocobaseError } from 'cocobase'
+import type { User } from '@supabase/supabase-js'
 import type { IncomingMessage, ServerResponse } from 'node:http'
-import { getCocobaseClient } from './cocobase.js'
+import { isAdminUser } from './admin-role.js'
+import { getSupabaseClient } from './supabase.js'
 import { sendJson } from './http.js'
-import { getSessionToken } from './session.js'
+import { getRefreshToken, getSessionToken, setSessionCookies } from './session.js'
 
 const rateLimitWindow = 15 * 60 * 1000
 const failedLogins = new Map<string, number[]>()
-export { clearSessionCookie, getSessionToken, setSessionCookie } from './session.js'
+export { clearSessionCookies, getRefreshToken, getSessionToken, setSessionCookies } from './session.js'
 
-function isAdminUser(user: AppUser) {
-  return Array.isArray(user.roles) && user.roles.includes('admin')
+function errorStatus(error: unknown) {
+  if (typeof error === 'object' && error !== null && 'status' in error && typeof error.status === 'number') {
+    return error.status
+  }
+  return null
 }
 
 export async function authenticateAdmin(email: string, password: string) {
-  const client = getCocobaseClient()
-  const result = await client.auth.login({ email, password })
-  const user = result.user
-  const token = client.auth.getToken()
-  if (result.requires_2fa || !user || !token || !isAdminUser(user)) {
+  const client = getSupabaseClient()
+  const { data, error } = await client.auth.signInWithPassword({ email, password })
+  if (error) throw error
+  if (!data.user || !data.session || !isAdminUser(data.user)) {
     throw new Error('Authentication failed.')
   }
-  return { user, token }
+  return {
+    user: data.user,
+    accessToken: data.session.access_token,
+    refreshToken: data.session.refresh_token,
+    expiresIn: data.session.expires_in,
+  }
 }
 
-export async function verifyAdminSession(request: IncomingMessage) {
-  const token = getSessionToken(request)
-  if (!token) return null
-  const client = getCocobaseClient()
-  client.auth.setToken(token)
-  const user = await client.auth.getCurrentUser()
-  return isAdminUser(user) ? user : null
+async function verifyAdminSession(request: IncomingMessage, response: ServerResponse) {
+  const accessToken = getSessionToken(request)
+  const refreshToken = getRefreshToken(request)
+  if (!accessToken && !refreshToken) return null
+
+  const client = getSupabaseClient()
+  if (accessToken) {
+    const { data, error } = await client.auth.getUser(accessToken)
+    if (!error && data.user && isAdminUser(data.user)) return { user: data.user, accessToken }
+    if (error && errorStatus(error) !== 401 && errorStatus(error) !== 403) throw error
+    if (!error && data.user && !isAdminUser(data.user)) return null
+  }
+
+  if (!refreshToken) return null
+  const { data, error } = await client.auth.refreshSession({ refresh_token: refreshToken })
+  if (error) {
+    if (errorStatus(error) === 400 || errorStatus(error) === 401 || errorStatus(error) === 403) return null
+    throw error
+  }
+  if (!data.user || !data.session || !isAdminUser(data.user)) return null
+
+  setSessionCookies(response, data.session.access_token, data.session.refresh_token, data.session.expires_in)
+  return { user: data.user, accessToken: data.session.access_token }
 }
 
 export async function verifyAdminSessionOrRespond(request: IncomingMessage, response: ServerResponse) {
   try {
-    const user = await verifyAdminSession(request)
-    if (!user) {
+    const session = await verifyAdminSession(request, response)
+    if (!session) {
       sendJson(response, 401, { error: 'Authentication required.' })
       return null
     }
-    return user
+    return session
   } catch (error) {
-    if (error instanceof CocobaseError && (error.statusCode === 401 || error.statusCode === 403)) {
-      sendJson(response, 401, { error: 'Authentication required.' })
-      return null
-    }
     console.error('Admin session verification failed:', error)
     sendJson(response, 502, { error: 'Unable to verify the admin session.' })
     return null
@@ -74,6 +93,10 @@ export async function recordFailedLogin(ip: string) {
   await new Promise((resolve) => setTimeout(resolve, 500))
 }
 
-export function adminUserResponse(user: AppUser) {
+export function adminUserResponse(user: User) {
   return { email: user.email }
+}
+
+export function getAdminSupabaseClient(session: { accessToken: string }) {
+  return getSupabaseClient(session.accessToken)
 }

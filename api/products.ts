@@ -1,6 +1,6 @@
 import type { IncomingMessage, ServerResponse } from 'node:http'
-import { getProductsCollection, isCocobaseConfigured } from '../server/cocobase.js'
-import { listProductDocuments, mapProduct } from '../server/products.js'
+import { getSupabaseClient, isSupabaseConfigured } from '../server/supabase.js'
+import { getPublishedProductBySlug, listProductDocuments } from '../server/products.js'
 
 export default async function handler(request: IncomingMessage, response: ServerResponse) {
   response.setHeader('Content-Type', 'application/json; charset=utf-8')
@@ -13,32 +13,27 @@ export default async function handler(request: IncomingMessage, response: Server
     return
   }
 
-  if (!isCocobaseConfigured()) {
+  if (!isSupabaseConfigured()) {
     response.setHeader('Cache-Control', 'no-store')
     response.statusCode = 503
-    response.end(JSON.stringify({ error: 'CocoBase is not configured.' }))
+    response.end(JSON.stringify({ error: 'Supabase is not configured.' }))
     return
   }
 
   try {
-    const documents = await listProductDocuments(getProductsCollection())
-    const products = documents
-      .filter((document) => document.data.isPublished === true)
-      .flatMap((document) => {
-        const product = mapProduct(document)
-        return product ? [product] : []
-      })
-      .sort((first, second) => second.createdAt.localeCompare(first.createdAt))
+    const client = getSupabaseClient()
     const slug = new URL(request.url || '/', 'http://localhost').searchParams.get('slug')
+    const products = slug === null ? await listProductDocuments(client, true) : null
+    const product = slug === null ? null : await getPublishedProductBySlug(client, slug)
 
     response.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=300')
     response.statusCode = 200
     response.setHeader('Content-Type', 'application/json; charset=utf-8')
     response.end(JSON.stringify(slug === null
-      ? { products }
-      : { product: products.find((product) => product.slug === slug) ?? null }))
+      ? { products: products ?? [] }
+      : { product }))
   } catch (error) {
-    console.error('CocoBase product request failed:', error)
+    console.error('Supabase product request failed:', error)
     response.setHeader('Cache-Control', 'no-store')
     response.statusCode = 502
     response.end(JSON.stringify({ error: 'Unable to load products.' }))

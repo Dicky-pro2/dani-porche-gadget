@@ -30,7 +30,7 @@ export function AdminLoginPage() {
       <section className="admin-login">
         <BrandLogo />
         <h1>Admin sign in</h1>
-        <p>Sign in with your CocoBase administrator account.</p>
+        <p>Sign in with your shop administrator account.</p>
         <form onSubmit={handleSubmit}>
           <label className="admin-field" htmlFor="admin-email">Email address
             <input id="admin-email" autoComplete="username" type="email" required value={email} onChange={(event) => setEmail(event.target.value)} />

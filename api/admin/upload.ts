@@ -1,11 +1,11 @@
-import { uploadFile } from 'cocobase'
+import { randomUUID } from 'node:crypto'
 import { Buffer } from 'node:buffer'
 import type { IncomingMessage, ServerResponse } from 'node:http'
-import { verifyAdminSessionOrRespond } from '../../server/auth.js'
-import { getCocobaseClient } from '../../server/cocobase.js'
+import { getAdminSupabaseClient, verifyAdminSessionOrRespond } from '../../server/auth.js'
 import { hasAllowedOrigin, sendJson } from '../../server/http.js'
 
 const maxFileBytes = 4 * 1024 * 1024
+const storageBucket = 'product-images'
 
 async function readImageBytes(request: IncomingMessage) {
   const body = (request as IncomingMessage & { body?: unknown }).body
@@ -13,6 +13,8 @@ async function readImageBytes(request: IncomingMessage) {
     if (body.length > maxFileBytes) throw new Error('Too large.')
     return body
   }
+  if (body !== undefined) throw new Error('Invalid image body.')
+
   const chunks: Buffer[] = []
   let size = 0
   for await (const chunk of request) {
@@ -31,8 +33,15 @@ function detectImageType(bytes: Buffer) {
   return null
 }
 
+function imageExtension(mimeType: string) {
+  if (mimeType === 'image/jpeg') return 'jpg'
+  if (mimeType === 'image/png') return 'png'
+  return 'webp'
+}
+
 export default async function handler(request: IncomingMessage, response: ServerResponse) {
-  if (!await verifyAdminSessionOrRespond(request, response)) return
+  const session = await verifyAdminSessionOrRespond(request, response)
+  if (!session) return
   if (request.method !== 'POST') {
     response.setHeader('Allow', 'POST')
     sendJson(response, 405, { error: 'Method not allowed.' })
@@ -63,13 +72,16 @@ export default async function handler(request: IncomingMessage, response: Server
       sendJson(response, 400, { error: 'Image content does not match its file type.' })
       return
     }
-    const fileName = request.headers['x-file-name']
-    const safeName = typeof fileName === 'string' && /^[a-zA-Z0-9._-]{1,100}$/.test(fileName)
-      ? fileName
-      : `product.${detectedType.split('/')[1]}`
-    const file = new File([Uint8Array.from(bytes)], safeName, { type: detectedType })
-    const uploaded = await uploadFile(getCocobaseClient(), file)
-    const url = new URL(uploaded.url)
+    const path = `products/${randomUUID()}.${imageExtension(detectedType)}`
+    const client = getAdminSupabaseClient(session)
+    const { error } = await client.storage.from(storageBucket).upload(path, bytes, {
+      cacheControl: '31536000',
+      contentType: detectedType,
+      upsert: false,
+    })
+    if (error) throw error
+    const { data } = client.storage.from(storageBucket).getPublicUrl(path)
+    const url = new URL(data.publicUrl)
     if (url.protocol !== 'https:') throw new Error('Invalid storage URL.')
     sendJson(response, 200, { url: url.href })
   } catch (error) {
@@ -77,7 +89,11 @@ export default async function handler(request: IncomingMessage, response: Server
       sendJson(response, 413, { error: 'Image must be 4 MB or smaller.' })
       return
     }
-    console.error('CocoBase image upload failed:', error)
+    if (error instanceof Error && error.message === 'Invalid image body.') {
+      sendJson(response, 400, { error: 'Invalid image upload.' })
+      return
+    }
+    console.error('Supabase image upload failed:', error)
     sendJson(response, 502, { error: 'Unable to upload image.' })
   }
 }

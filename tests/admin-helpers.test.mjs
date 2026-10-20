@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
+import { isAdminUser } from '../server/admin-role.ts'
 import { hasAllowedOrigin } from '../server/http.ts'
-import { clearSessionCookie, getSessionToken, setSessionCookie } from '../server/session.ts'
+import { clearSessionCookies, getRefreshToken, getSessionToken, setSessionCookies } from '../server/session.ts'
 import { validateProductInput } from '../server/validate.ts'
 
 const validProduct = () => ({
@@ -41,13 +42,16 @@ test('session cookie helpers use the required secure cookie attributes', () => {
       this.headers[name] = value
     },
   }
-  setSessionCookie(response, 'signed-token')
-  assert.match(response.headers['Set-Cookie'], /HttpOnly/)
-  assert.match(response.headers['Set-Cookie'], /Secure/)
-  assert.match(response.headers['Set-Cookie'], /SameSite=Strict/)
-  assert.equal(getSessionToken({ headers: { cookie: response.headers['Set-Cookie'].split(';')[0] } }), 'signed-token')
-  clearSessionCookie(response)
-  assert.match(response.headers['Set-Cookie'], /Max-Age=0/)
+  setSessionCookies(response, 'access-token', 'refresh-token', 3600)
+  assert.match(response.headers['Set-Cookie'][0], /HttpOnly/)
+  assert.match(response.headers['Set-Cookie'][0], /Secure/)
+  assert.match(response.headers['Set-Cookie'][0], /SameSite=Strict/)
+  const cookieRequest = { headers: { cookie: response.headers['Set-Cookie'].map((cookie) => cookie.split(';')[0]).join('; ') } }
+  assert.equal(getSessionToken(cookieRequest), 'access-token')
+  assert.equal(getRefreshToken(cookieRequest), 'refresh-token')
+  clearSessionCookies(response)
+  assert.match(response.headers['Set-Cookie'][0], /Max-Age=0/)
+  assert.match(response.headers['Set-Cookie'][1], /Max-Age=0/)
 })
 
 test('origin check allows request host and rejects missing or different origins', () => {
@@ -62,4 +66,12 @@ test('origin check allows request host and rejects missing or different origins'
   }), true)
   assert.equal(hasAllowedOrigin({ headers: { origin: 'https://evil.example', host: 'example.vercel.app' } }), false)
   assert.equal(hasAllowedOrigin({ headers: { host: 'example.vercel.app' } }), false)
+})
+
+test('administrator access requires trusted Supabase app metadata', () => {
+  assert.equal(isAdminUser({ app_metadata: { role: 'admin' } }), true)
+  assert.equal(isAdminUser({ app_metadata: { roles: ['admin'] } }), true)
+  assert.equal(isAdminUser({ app_metadata: { role: 'admin' }, user_metadata: { role: 'visitor' } }), true)
+  assert.equal(isAdminUser({ app_metadata: { role: 'visitor' }, user_metadata: { role: 'admin' } }), false)
+  assert.equal(isAdminUser({ app_metadata: { role: 'visitor' } }), false)
 })

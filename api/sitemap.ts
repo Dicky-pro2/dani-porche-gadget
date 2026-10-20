@@ -1,6 +1,6 @@
 import type { IncomingMessage, ServerResponse } from 'node:http'
-import { getProductsCollection, isCocobaseConfigured } from '../server/cocobase.js'
-import { listProductDocuments, mapProduct } from '../server/products.js'
+import { getSupabaseClient } from '../server/supabase.js'
+import { listProductDocuments } from '../server/products.js'
 
 function escapeXml(value: string) {
   return value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&apos;')
@@ -13,11 +13,7 @@ export default async function handler(_request: IncomingMessage, response: Serve
   const paths = ['/', '/shop', '/about', '/support']
 
   try {
-    if (!isCocobaseConfigured()) throw new Error('CocoBase is not configured.')
-    const products = (await listProductDocuments(getProductsCollection()))
-      .filter((document) => document.data.isPublished === true)
-      .map(mapProduct)
-      .filter((product) => product !== null)
+    const products = await listProductDocuments(getSupabaseClient(), true)
     paths.push(...products.map((product) => `/products/${encodeURIComponent(product.slug)}`))
     const urls = paths.map((path) => `  <url><loc>${escapeXml(`${origin}${path}`)}</loc></url>`).join('\n')
     response.statusCode = 200

@@ -37,7 +37,7 @@ export function AdminDashboardPage() {
       <div className="admin-page-heading"><div><h1>Overview</h1><p>Your shop at a glance.</p></div></div>
       {error && <p className="admin-error" role="alert">{error}</p>}
       <div className="admin-stats">{metrics.map(({ label, value, icon: Icon }) => <div className="admin-stat" key={label}><span><Icon className="admin-stat-icon" size={13} />{label}</span><strong>{loading ? '…' : error ? '—' : value}</strong></div>)}</div>
-      <section className="admin-panel"><h2>Product catalogue</h2><p className="admin-muted">Counts reflect the current CocoBase product collection.</p></section>
+      <section className="admin-panel"><h2>Product catalogue</h2><p className="admin-muted">Counts reflect the current Supabase product catalogue.</p></section>
     </>
   )
 }

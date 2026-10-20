@@ -1,25 +1,22 @@
 import type { IncomingMessage, ServerResponse } from 'node:http'
-import { verifyAdminSessionOrRespond } from '../../server/auth.js'
-import { getProductsCollection } from '../../server/cocobase.js'
+import { getAdminSupabaseClient, verifyAdminSessionOrRespond } from '../../server/auth.js'
 import { sendJson } from '../../server/http.js'
-import { listProductDocuments, mapProduct } from '../../server/products.js'
+import { listProductDocuments } from '../../server/products.js'
 
 export default async function handler(request: IncomingMessage, response: ServerResponse) {
   response.setHeader('Cache-Control', 'no-store')
-  if (!await verifyAdminSessionOrRespond(request, response)) return
+  const session = await verifyAdminSessionOrRespond(request, response)
+  if (!session) return
   if (request.method !== 'GET') {
     response.setHeader('Allow', 'GET')
     sendJson(response, 405, { error: 'Method not allowed.' })
     return
   }
   try {
-    const products = (await listProductDocuments(getProductsCollection()))
-      .map(mapProduct)
-      .filter((product) => product !== null)
-      .sort((first, second) => second.createdAt.localeCompare(first.createdAt))
+    const products = await listProductDocuments(getAdminSupabaseClient(session))
     sendJson(response, 200, { products })
   } catch (error) {
-    console.error('CocoBase admin product list failed:', error)
+    console.error('Supabase admin product list failed:', error)
     sendJson(response, 502, { error: 'Unable to load products.' })
   }
 }

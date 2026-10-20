@@ -1,5 +1,5 @@
 import type { IncomingMessage, ServerResponse } from 'node:http'
-import { clearSessionCookie, verifyAdminSessionOrRespond } from '../../server/auth.js'
+import { clearSessionCookies, verifyAdminSessionOrRespond } from '../../server/auth.js'
 import { hasAllowedOrigin, requireJson, sendJson } from '../../server/http.js'
 
 export default async function handler(request: IncomingMessage, response: ServerResponse) {
@@ -17,6 +17,6 @@ export default async function handler(request: IncomingMessage, response: Server
     sendJson(response, 415, { error: 'JSON content type required.' })
     return
   }
-  clearSessionCookie(response)
+  clearSessionCookies(response)
   sendJson(response, 200, { success: true })
 }
