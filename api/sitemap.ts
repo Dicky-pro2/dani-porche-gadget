@@ -1,6 +1,6 @@
 import type { IncomingMessage, ServerResponse } from 'node:http'
-import { getProductsCollection, isCocobaseConfigured } from './lib/cocobase.js'
-import { listProductDocuments, mapProduct } from './lib/products.js'
+import { getProductsCollection, isCocobaseConfigured } from '../server/cocobase.js'
+import { listProductDocuments, mapProduct } from '../server/products.js'
 
 function escapeXml(value: string) {
   return value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&apos;')

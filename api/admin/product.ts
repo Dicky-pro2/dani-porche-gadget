@@ -1,9 +1,9 @@
 import type { IncomingMessage, ServerResponse } from 'node:http'
-import { verifyAdminSessionOrRespond } from '../lib/auth.js'
-import { getCocobaseClient, getProductsCollection } from '../lib/cocobase.js'
-import { hasAllowedOrigin, queryParam, readJson, requireJson, sendJson } from '../lib/http.js'
-import { listProductDocuments, mapProduct } from '../lib/products.js'
-import { validateProductInput } from '../lib/validate.js'
+import { verifyAdminSessionOrRespond } from '../../server/auth.js'
+import { getCocobaseClient, getProductsCollection } from '../../server/cocobase.js'
+import { hasAllowedOrigin, queryParam, readJson, requireJson, sendJson } from '../../server/http.js'
+import { listProductDocuments, mapProduct } from '../../server/products.js'
+import { validateProductInput } from '../../server/validate.js'
 
 async function isSlugUnique(slug: string, excludingId?: string) {
   const documents = await listProductDocuments(getProductsCollection())

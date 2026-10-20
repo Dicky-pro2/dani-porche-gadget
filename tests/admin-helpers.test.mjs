@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { clearSessionCookie, getSessionToken, setSessionCookie } from '../api/lib/session.ts'
-import { validateProductInput } from '../api/lib/validate.ts'
+import { hasAllowedOrigin } from '../server/http.ts'
+import { clearSessionCookie, getSessionToken, setSessionCookie } from '../server/session.ts'
+import { validateProductInput } from '../server/validate.ts'
 
 const validProduct = () => ({
   name: 'Aster X9 Pro',
@@ -47,4 +48,18 @@ test('session cookie helpers use the required secure cookie attributes', () => {
   assert.equal(getSessionToken({ headers: { cookie: response.headers['Set-Cookie'].split(';')[0] } }), 'signed-token')
   clearSessionCookie(response)
   assert.match(response.headers['Set-Cookie'], /Max-Age=0/)
+})
+
+test('origin check allows request host and rejects missing or different origins', () => {
+  assert.equal(hasAllowedOrigin({ headers: { origin: 'https://example.vercel.app', host: 'example.vercel.app' } }), true)
+  assert.equal(hasAllowedOrigin({ headers: { origin: 'http://localhost:3000', host: 'localhost:3000' } }), true)
+  assert.equal(hasAllowedOrigin({
+    headers: {
+      origin: 'https://shop.example.com',
+      host: 'internal.vercel',
+      'x-forwarded-host': 'shop.example.com',
+    },
+  }), true)
+  assert.equal(hasAllowedOrigin({ headers: { origin: 'https://evil.example', host: 'example.vercel.app' } }), false)
+  assert.equal(hasAllowedOrigin({ headers: { host: 'example.vercel.app' } }), false)
 })

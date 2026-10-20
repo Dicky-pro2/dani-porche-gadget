@@ -1,9 +1,9 @@
 import { uploadFile } from 'cocobase'
 import { Buffer } from 'node:buffer'
 import type { IncomingMessage, ServerResponse } from 'node:http'
-import { verifyAdminSessionOrRespond } from '../lib/auth.js'
-import { getCocobaseClient } from '../lib/cocobase.js'
-import { hasAllowedOrigin, sendJson } from '../lib/http.js'
+import { verifyAdminSessionOrRespond } from '../../server/auth.js'
+import { getCocobaseClient } from '../../server/cocobase.js'
+import { hasAllowedOrigin, sendJson } from '../../server/http.js'
 
 const maxFileBytes = 4 * 1024 * 1024
 

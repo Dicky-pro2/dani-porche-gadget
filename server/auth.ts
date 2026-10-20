@@ -9,12 +9,16 @@ const rateLimitWindow = 15 * 60 * 1000
 const failedLogins = new Map<string, number[]>()
 export { clearSessionCookie, getSessionToken, setSessionCookie } from './session.js'
 
+function isAdminUser(user: AppUser) {
+  return Array.isArray(user.roles) && user.roles.includes('admin')
+}
+
 export async function authenticateAdmin(email: string, password: string) {
   const client = getCocobaseClient()
   const result = await client.auth.login({ email, password })
   const user = result.user
   const token = client.auth.getToken()
-  if (result.requires_2fa || !user || !token || !client.auth.hasRole('admin')) {
+  if (result.requires_2fa || !user || !token || !isAdminUser(user)) {
     throw new Error('Authentication failed.')
   }
   return { user, token }
@@ -26,7 +30,7 @@ export async function verifyAdminSession(request: IncomingMessage) {
   const client = getCocobaseClient()
   client.auth.setToken(token)
   const user = await client.auth.getCurrentUser()
-  return client.auth.hasRole('admin') ? user : null
+  return isAdminUser(user) ? user : null
 }
 
 export async function verifyAdminSessionOrRespond(request: IncomingMessage, response: ServerResponse) {

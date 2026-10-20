@@ -1,3 +1,4 @@
+import { Buffer } from 'node:buffer'
 import type { IncomingMessage, ServerResponse } from 'node:http'
 
 export function sendJson(response: ServerResponse, statusCode: number, body: unknown) {
@@ -14,9 +15,12 @@ export function requireJson(request: IncomingMessage) {
 
 export function hasAllowedOrigin(request: IncomingMessage) {
   const origin = request.headers.origin
-  const configuredOrigin = process.env.VITE_SITE_URL || 'https://dani-porche-gadget.vercel.app'
+  if (typeof origin !== 'string') return false
+  const forwardedHost = request.headers['x-forwarded-host']
+  const host = (typeof forwardedHost === 'string' ? forwardedHost.split(',')[0] : request.headers.host)?.trim()
+  if (!host) return false
   try {
-    return typeof origin === 'string' && new URL(origin).origin === new URL(configuredOrigin).origin
+    return new URL(origin).host === host
   } catch {
     return false
   }

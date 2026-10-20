@@ -1,6 +1,6 @@
 import type { IncomingMessage, ServerResponse } from 'node:http'
-import { clearSessionCookie, verifyAdminSessionOrRespond } from '../lib/auth.js'
-import { hasAllowedOrigin, requireJson, sendJson } from '../lib/http.js'
+import { clearSessionCookie, verifyAdminSessionOrRespond } from '../../server/auth.js'
+import { hasAllowedOrigin, requireJson, sendJson } from '../../server/http.js'
 
 export default async function handler(request: IncomingMessage, response: ServerResponse) {
   if (!await verifyAdminSessionOrRespond(request, response)) return

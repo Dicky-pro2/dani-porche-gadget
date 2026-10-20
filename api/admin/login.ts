@@ -1,7 +1,7 @@
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import { CocobaseError } from 'cocobase'
-import { authenticateAdmin, adminUserResponse, recordFailedLogin, setSessionCookie, loginIsRateLimited } from '../lib/auth.js'
-import { hasAllowedOrigin, readJson, requestIp, requireJson, sendJson } from '../lib/http.js'
+import { authenticateAdmin, adminUserResponse, recordFailedLogin, setSessionCookie, loginIsRateLimited } from '../../server/auth.js'
+import { hasAllowedOrigin, readJson, requestIp, requireJson, sendJson } from '../../server/http.js'
 
 export default async function handler(request: IncomingMessage, response: ServerResponse) {
   response.setHeader('Cache-Control', 'no-store')

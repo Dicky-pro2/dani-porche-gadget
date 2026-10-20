@@ -1,6 +1,6 @@
 import type { IncomingMessage, ServerResponse } from 'node:http'
-import { getProductsCollection, isCocobaseConfigured } from './lib/cocobase.js'
-import { listProductDocuments, mapProduct } from './lib/products.js'
+import { getProductsCollection, isCocobaseConfigured } from '../server/cocobase.js'
+import { listProductDocuments, mapProduct } from '../server/products.js'
 
 export default async function handler(request: IncomingMessage, response: ServerResponse) {
   response.setHeader('Content-Type', 'application/json; charset=utf-8')

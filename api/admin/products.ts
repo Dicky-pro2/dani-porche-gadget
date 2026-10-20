@@ -1,8 +1,8 @@
 import type { IncomingMessage, ServerResponse } from 'node:http'
-import { verifyAdminSessionOrRespond } from '../lib/auth.js'
-import { getProductsCollection } from '../lib/cocobase.js'
-import { sendJson } from '../lib/http.js'
-import { listProductDocuments, mapProduct } from '../lib/products.js'
+import { verifyAdminSessionOrRespond } from '../../server/auth.js'
+import { getProductsCollection } from '../../server/cocobase.js'
+import { sendJson } from '../../server/http.js'
+import { listProductDocuments, mapProduct } from '../../server/products.js'
 
 export default async function handler(request: IncomingMessage, response: ServerResponse) {
   response.setHeader('Cache-Control', 'no-store')

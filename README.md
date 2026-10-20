@@ -37,7 +37,7 @@ Set these variables in Vercel under **Settings → Environment Variables** for b
 
 - `COCOBASE_API_KEY` — server-only CocoBase API key. Do not prefix it with `VITE_`.
 - `COCOBASE_PRODUCTS_COLLECTION` — collection name; use `products` unless you chose another collection.
-- `VITE_SITE_URL` — the canonical HTTPS origin of the deployment. This is also checked against browser `Origin` headers on admin writes. Set an origin matching each deployment environment.
+- `VITE_SITE_URL` — the canonical HTTPS origin of the deployment. Admin write requests are accepted only when the `Origin` header's host matches the host the request was sent to. This variable is used only for canonical URLs, Open Graph tags and the sitemap.
 
 The owner must have a CocoBase account with the `admin` role. Admin sign-in is proxied through the server; the CocoBase access token is kept in a `Secure`, `HttpOnly`, `SameSite=Strict` cookie. The server verifies the account and `admin` role on every protected request. Do not grant the `admin` role to public users.
 
