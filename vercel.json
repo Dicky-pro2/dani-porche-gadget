@@ -1,6 +1,9 @@
 {
   "crons": [
-    { "path": "/api/cron/reconcile-orders", "schedule": "*/15 * * * *" }
+    {
+      "path": "/api/cron/reconcile-orders",
+      "schedule": "0 2 * * *"
+    }
   ],
   "rewrites": [
     { "source": "/sitemap.xml", "destination": "/api/sitemap" },
