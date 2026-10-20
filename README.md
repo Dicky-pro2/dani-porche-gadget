@@ -1,6 +1,6 @@
 # Dani Porshe Gadget
 
-A responsive React, TypeScript, and Vite storefront with product data in Supabase and a protected owner administration area. Customers can browse products and send an enquiry through WhatsApp; the site does not take payment or confirm orders.
+A responsive React, TypeScript, and Vite storefront with product data in Supabase, hosted Paystack checkout, and a protected owner administration area. WhatsApp remains available for general enquiries.
 
 ## Local development
 
@@ -10,7 +10,7 @@ Use `npm run build` to type-check and create a production bundle, `npm run lint`
 
 ## Supabase setup
 
-Create a Supabase project, then run [`supabase/migrations/20261020000000_create_dpg_products_and_storage.sql`](./supabase/migrations/20261020000000_create_dpg_products_and_storage.sql) in the Supabase SQL Editor. The migration creates the dedicated `public.dpg_products` table, its indexes and Row Level Security policies, and a public `product-images` Storage bucket with a 4 MB limit and JPEG, PNG, and WebP MIME allow-list.
+Create a Supabase project, then run [`supabase/migrations/20261020000000_create_dpg_products_and_storage.sql`](./supabase/migrations/20261020000000_create_dpg_products_and_storage.sql) followed by [`supabase/migrations/20261020120000_create_dpg_orders.sql`](./supabase/migrations/20261020120000_create_dpg_orders.sql) in the Supabase SQL Editor. The migrations create the product and order tables, stock reservation/payment RPCs, Row Level Security policies, and a public `product-images` Storage bucket with a 4 MB limit and JPEG, PNG, and WebP MIME allow-list.
 
 The migration is additive: it does not drop product rows or replace an existing bucket configuration. If `public.dpg_products` or the `product-images` bucket already exists, inspect its schema and settings before applying the migration; `create table if not exists` and `on conflict do nothing` intentionally leave existing objects unchanged.
 
@@ -49,7 +49,27 @@ Set these variables in Vercel for both **Production** and **Preview**:
 - `SUPABASE_PUBLISHABLE_KEY` — public Supabase publishable key. The API also accepts `VITE_SUPABASE_PUBLISHABLE_KEY`; use one pair consistently.
 - `VITE_SITE_URL` — canonical HTTPS storefront origin, used for metadata and the sitemap.
 
-`SUPABASE_SERVICE_ROLE_KEY` is **not** required by the deployed application. Use it only in a trusted local shell for the one-time administrator-role setup or legacy data import scripts. Do not add it to Vercel or expose it to the browser.
+The existing admin product APIs continue to use the admin's Supabase access token. Order processing also requires `SUPABASE_SERVICE_ROLE_KEY` as a server-only Vercel setting for the narrowly scoped, private order/payment RPCs; never prefix it with `VITE_` or expose it in frontend code. The one-time admin-role and legacy import scripts also use this key only in a trusted local shell.
+
+## Checkout setup
+
+This storefront is NGN-priced and hosted on Vercel, so checkout uses [Paystack's hosted transaction flow](https://paystack.com/docs/api/transaction/). The app sends customers to Paystack; it never collects raw card details. The server initializes transactions in kobo, verifies the transaction reference, amount, and currency, and validates `charge.success` webhooks with Paystack's HMAC-SHA512 signature before marking an order paid. A browser return alone never confirms payment. Admin email notifications use [Resend's email API](https://resend.com/docs/api-reference/emails/send-email) and idempotency keys.
+
+Apply both Supabase migrations in order before deploying. Confirm each sellable product has a positive NGN price with no more than two decimal places, correct available stock, and any options in its `colors` list. `DELIVERY_FEE_NGN` is a server-only fixed delivery fee and defaults to `0`; redeploy after changing it. Customer checkout details and price snapshots are stored in `dpg_orders`; failed or provider-confirmed abandoned transactions release stock, while a verified successful transaction reduces stock.
+
+Configure these server-only variables in Vercel Production and Preview (and in `.env.local` when using `npx vercel dev`):
+
+- `SUPABASE_SERVICE_ROLE_KEY` — Supabase service-role secret. Required by server order processing; never expose it to the browser.
+- `PAYSTACK_SECRET_KEY` — Paystack test secret key for Preview/sandbox and the live secret key only when intentionally enabling Production payments.
+- `DELIVERY_FEE_NGN` — fixed NGN delivery fee, such as `0` or `2500`.
+- `CRON_SECRET` — long random value used to authorize Vercel's scheduled reconciliation route. Vercel sends it as a bearer token when configured.
+- `RESEND_API_KEY`, `RESEND_FROM_EMAIL`, `ADMIN_NOTIFICATION_EMAIL` — optional but recommended. Verify the sending domain in Resend and use a sender on that domain. Without all three, order emails are disabled; payment/order status remains available in admin.
+
+In the Paystack dashboard, use **test mode** first. Configure the webhook URL as `https://<your-preview-domain>/api/paystack/webhook` and subscribe to `charge.success`. The webhook uses the same Paystack secret key for HMAC verification; set the matching test key in the Preview environment. The return URL is passed per transaction by the app. Do not use live credentials until the Preview flow, webhook, stock transitions, and admin order list have been checked end to end. Use Paystack's [official test payment instructions](https://paystack.com/docs/payments/test-payments/) for sandbox payment methods.
+
+Safe sandbox test: create a low-stock test product with an NGN price; place an order with a valid test email and delivery address; use a Paystack test payment method from the official Paystack testing guide; confirm the order is first pending and then paid after server verification; check stock and the admin Orders page; retry the same checkout after refresh and confirm there is one order/reference; test a failed or abandoned payment and confirm stock is released only after provider verification. Also send a signed test webhook from Paystack and verify that replaying it does not duplicate stock changes or email notifications.
+
+The Vercel cron in `vercel.json` runs every 15 minutes. It checks expired reservations with Paystack before settling them and retries pending notification delivery. Vercel Cron availability depends on the deployment plan; if unavailable, invoke the endpoint from a trusted scheduler with `Authorization: Bearer <CRON_SECRET>`.
 
 ## Security and storage
 
