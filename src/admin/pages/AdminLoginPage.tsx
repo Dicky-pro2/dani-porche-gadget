@@ -43,6 +43,7 @@ export function AdminLoginPage() {
             <LockKeyhole size={15} />{submitting ? 'SIGNING IN…' : 'SIGN IN'}
           </button>
         </form>
+        <p>Need an account? <Link className="text-link" to={routes.adminRegister}>Register</Link>. Administrator access requires owner approval.</p>
         <Link className="text-link admin-back-link" to="/"><ArrowLeft size={13} /> BACK TO STOREFRONT</Link>
       </section>
     </main>

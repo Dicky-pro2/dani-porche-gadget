@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import { isAdminUser } from '../server/admin-role.ts'
 import { hasAllowedOrigin } from '../server/http.ts'
+import { validateRegistrationInput } from '../server/registration.ts'
 import { clearSessionCookies, getRefreshToken, getSessionToken, setSessionCookies } from '../server/session.ts'
 import { validateProductInput } from '../server/validate.ts'
 
@@ -74,4 +75,13 @@ test('administrator access requires trusted Supabase app metadata', () => {
   assert.equal(isAdminUser({ app_metadata: { role: 'admin' }, user_metadata: { role: 'visitor' } }), true)
   assert.equal(isAdminUser({ app_metadata: { role: 'visitor' }, user_metadata: { role: 'admin' } }), false)
   assert.equal(isAdminUser({ app_metadata: { role: 'visitor' } }), false)
+})
+
+test('public registration accepts only email and password and grants no role fields', () => {
+  assert.deepEqual(validateRegistrationInput({ email: '  user@example.com ', password: 'password123' }), {
+    email: 'user@example.com',
+    password: 'password123',
+  })
+  assert.throws(() => validateRegistrationInput({ email: 'user@example.com', password: 'password123', role: 'admin' }))
+  assert.throws(() => validateRegistrationInput({ email: 'user@example.com', password: 'short' }))
 })

@@ -31,6 +31,12 @@ export async function authenticateAdmin(email: string, password: string) {
   }
 }
 
+export async function registerUser(email: string, password: string) {
+  const client = getSupabaseClient()
+  const { error } = await client.auth.signUp({ email, password })
+  if (error) throw error
+}
+
 async function verifyAdminSession(request: IncomingMessage, response: ServerResponse) {
   const accessToken = getSessionToken(request)
   const refreshToken = getRefreshToken(request)

@@ -6,6 +6,7 @@ export const routes = {
   support: '/support',
   admin: '/admin',
   adminLogin: '/admin/login',
+  adminRegister: '/admin/register',
   adminProducts: 'products',
   adminCategories: 'categories',
   adminInventory: 'inventory',

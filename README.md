@@ -18,7 +18,9 @@ Public users can select published products only. Administrator database and Stor
 
 ### Administrator account
 
-Create or invite the administrator in Supabase **Authentication → Users** with email/password authentication enabled. The old CocoBase passwords and admin roles are not transferred. Set the new user's admin app metadata with the one-time local script:
+The `/admin/register` page lets people create a Supabase email/password account if email sign-ups are enabled in Supabase Auth. Registration creates an ordinary user only: it does not grant admin access or establish an admin session. The shop owner must promote the account before it can use protected admin features. The old CocoBase passwords and admin roles are not transferred.
+
+To promote an account, find its user ID in Supabase **Authentication → Users**, then set the user's admin app metadata with the one-time local script:
 
 1. Set `VITE_SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` in a trusted local shell. Never put the service-role key in a `VITE_` variable, client code, or Vercel project settings.
 2. Run `node --env-file=.env.local scripts/set-admin-role.mjs <supabase-auth-user-uuid>`.

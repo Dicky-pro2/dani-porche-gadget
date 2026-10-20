@@ -8,6 +8,7 @@ type AdminResponse = {
   user?: unknown
   url?: unknown
   success?: unknown
+  message?: unknown
 }
 
 async function apiRequest(url: string, init?: RequestInit) {
@@ -48,6 +49,16 @@ export async function signInAdmin(email: string, password: string) {
     throw new Error('The server returned an invalid session.')
   }
   return body.user as AdminUser
+}
+
+export async function registerAdminAccount(email: string, password: string) {
+  const body = await apiRequest('/api/admin/register', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password }),
+  })
+  if (typeof body.message !== 'string') throw new Error('The server returned an invalid registration response.')
+  return body.message
 }
 
 export async function signOutAdmin() {

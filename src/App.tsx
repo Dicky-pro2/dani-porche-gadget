@@ -19,6 +19,7 @@ import './App.css'
 const AdminLayout = lazy(() => import('./admin/layouts/AdminLayout').then((module) => ({ default: module.AdminLayout })))
 const AdminDashboardPage = lazy(() => import('./admin/pages/AdminDashboardPage').then((module) => ({ default: module.AdminDashboardPage })))
 const AdminLoginPage = lazy(() => import('./admin/pages/AdminLoginPage').then((module) => ({ default: module.AdminLoginPage })))
+const AdminRegisterPage = lazy(() => import('./admin/pages/AdminRegisterPage').then((module) => ({ default: module.AdminRegisterPage })))
 const AdminManagementPage = lazy(() => import('./admin/pages/AdminManagementPage').then((module) => ({ default: module.AdminManagementPage })))
 const AdminProductsPage = lazy(() => import('./admin/pages/AdminProductsPage').then((module) => ({ default: module.AdminProductsPage })))
 const AdminProductFormPage = lazy(() => import('./admin/pages/AdminProductFormPage').then((module) => ({ default: module.AdminProductFormPage })))
@@ -51,6 +52,7 @@ function App() {
           <RouteMetadata />
           <Routes>
             <Route path={routes.adminLogin} element={<Suspense fallback={<div className="admin-loading">Loading…</div>}><AdminLoginPage /></Suspense>} />
+            <Route path={routes.adminRegister} element={<Suspense fallback={<div className="admin-loading">Loading…</div>}><AdminRegisterPage /></Suspense>} />
             <Route
               path={routes.admin}
               element={
