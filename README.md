@@ -4,7 +4,7 @@ A responsive React, TypeScript, and Vite storefront with product data in Supabas
 
 ## Local development
 
-Install dependencies with `npm install`. Copy `.env.example` to `.env.local` and set `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`, and `VITE_SITE_URL`. Run `npx vercel dev` to serve the Vite application together with the serverless API routes. `npm run dev` starts Vite only, so `/api/*` routes are not available through that command.
+Install dependencies with `npm install`. Copy `.env.example` to `.env.local` and set `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`, and `VITE_SITE_URL`. Keep `.env.local` and other local environment files out of shared ZIP archives; only `.env.example` is safe to share. Run `npx vercel dev` to serve the Vite application together with the serverless API routes. `npm run dev` starts Vite only, so `/api/*` routes are not available through that command.
 
 Use `npm run build` to type-check and create a production bundle, `npm run lint` to run ESLint, and `npm run test:api` to exercise validation, session, origin, and API authorization behavior.
 
@@ -45,8 +45,8 @@ The importer does not delete or modify CocoBase data. It stops on malformed requ
 
 Set these variables in Vercel for both **Production** and **Preview**:
 
-- `VITE_SUPABASE_URL` — Supabase project URL.
-- `VITE_SUPABASE_PUBLISHABLE_KEY` — public Supabase publishable key. The project uses this one public-key convention; do not also configure an anonymous-key variable.
+- `SUPABASE_URL` — Supabase project URL. The API also accepts `VITE_SUPABASE_URL`.
+- `SUPABASE_PUBLISHABLE_KEY` — public Supabase publishable key. The API also accepts `VITE_SUPABASE_PUBLISHABLE_KEY`; use one pair consistently.
 - `VITE_SITE_URL` — canonical HTTPS storefront origin, used for metadata and the sitemap.
 
 `SUPABASE_SERVICE_ROLE_KEY` is **not** required by the deployed application. Use it only in a trusted local shell for the one-time administrator-role setup or legacy data import scripts. Do not add it to Vercel or expose it to the browser.

@@ -4,6 +4,7 @@ import { isAdminUser } from '../server/admin-role.ts'
 import { hasAllowedOrigin } from '../server/http.ts'
 import { validateRegistrationInput } from '../server/registration.ts'
 import { clearSessionCookies, getRefreshToken, getSessionToken, setSessionCookies } from '../server/session.ts'
+import { isSupabaseConfigured } from '../server/supabase.ts'
 import { validateProductInput } from '../server/validate.ts'
 
 const validProduct = () => ({
@@ -84,4 +85,33 @@ test('public registration accepts only email and password and grants no role fie
   })
   assert.throws(() => validateRegistrationInput({ email: 'user@example.com', password: 'password123', role: 'admin' }))
   assert.throws(() => validateRegistrationInput({ email: 'user@example.com', password: 'short' }))
+})
+
+test('Supabase configuration accepts server and Vite environment variable names', () => {
+  const names = [
+    'SUPABASE_URL',
+    'SUPABASE_PUBLISHABLE_KEY',
+    'VITE_SUPABASE_URL',
+    'VITE_SUPABASE_PUBLISHABLE_KEY',
+  ]
+  const original = Object.fromEntries(names.map((name) => [name, process.env[name]]))
+  try {
+    for (const name of names) delete process.env[name]
+    assert.equal(isSupabaseConfigured(), false)
+
+    process.env.SUPABASE_URL = 'https://project.example'
+    process.env.SUPABASE_PUBLISHABLE_KEY = 'publishable-key'
+    assert.equal(isSupabaseConfigured(), true)
+
+    delete process.env.SUPABASE_URL
+    delete process.env.SUPABASE_PUBLISHABLE_KEY
+    process.env.VITE_SUPABASE_URL = 'https://project.example'
+    process.env.VITE_SUPABASE_PUBLISHABLE_KEY = 'publishable-key'
+    assert.equal(isSupabaseConfigured(), true)
+  } finally {
+    for (const name of names) {
+      if (original[name] === undefined) delete process.env[name]
+      else process.env[name] = original[name]
+    }
+  }
 })
