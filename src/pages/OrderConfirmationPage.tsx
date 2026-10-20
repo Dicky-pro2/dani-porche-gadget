@@ -49,8 +49,13 @@ export function OrderConfirmationPage() {
           throw new Error(result.error || "Unable to verify payment status.");
         setOrder(result.order);
         if (result.order.paymentStatus === "paid") clear();
-        if (result.order.paymentStatus !== "pending")
-          sessionStorage.removeItem("dpg-checkout-attempt-v1");
+        if (result.order.paymentStatus !== "pending") {
+          try {
+            sessionStorage.removeItem("dpg-checkout-attempt-v1");
+          } catch {
+            return;
+          }
+        }
       })
       .catch((caught: unknown) => {
         if (!controller.signal.aborted)
@@ -77,19 +82,19 @@ export function OrderConfirmationPage() {
   const Icon =
     status === "paid"
       ? CheckCircle2
-      : status === "failed"
+      : status === "failed" || status === "expired"
         ? CircleAlert
         : Clock3;
   const heading =
     status === "paid"
       ? "Payment confirmed"
-      : status === "failed"
+      : status === "failed" || status === "expired"
         ? "Payment not completed"
         : "Payment confirmation pending";
   const detail =
     status === "paid"
       ? "Your payment has been verified and the order is now with the shop."
-      : status === "failed"
+      : status === "failed" || status === "expired"
         ? "The payment was not completed. Your reserved items have been released; you can return to the shop and try again."
         : "We have not received a confirmed payment yet. This page checks Paystack directly; please refresh the status in a moment.";
 
