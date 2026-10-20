@@ -12,11 +12,19 @@ type AdminResponse = {
 
 async function apiRequest(url: string, init?: RequestInit) {
   const response = await fetch(url, { ...init, credentials: 'same-origin', cache: 'no-store' })
+  const contentType = response.headers.get('content-type') || ''
+  if (!contentType.toLowerCase().includes('application/json')) {
+    if (response.status === 404) {
+      throw new Error('The admin API route was not found. Redeploy the latest project with the repository root as the Vercel root directory.')
+    }
+    throw new Error(`The server returned a non-JSON response (HTTP ${response.status}). Check the Vercel function logs.`)
+  }
+
   let body: AdminResponse
   try {
     body = await response.json() as AdminResponse
   } catch {
-    throw new Error('The server returned an invalid response.')
+    throw new Error(`The server returned invalid JSON (HTTP ${response.status}). Check the Vercel function logs.`)
   }
   if (!response.ok) throw new Error(typeof body.error === 'string' ? body.error : 'The request could not be completed.')
   return body
