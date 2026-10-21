@@ -7,8 +7,8 @@
   ],
   "rewrites": [
     {
-      "source": "/__route_probe/foo/bar",
-      "destination": "/api/_routingProbe?__dispatch=foo/bar"
+      "source": "/api/admin/:path*",
+      "destination": "/api/_admin?__dispatch=:path*"
     },
     { "source": "/sitemap.xml", "destination": "/api/sitemap" },
     { "source": "/((?!api/).*)", "destination": "/index.html" }

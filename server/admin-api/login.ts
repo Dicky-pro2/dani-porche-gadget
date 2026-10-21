@@ -1,6 +1,6 @@
 import type { IncomingMessage, ServerResponse } from 'node:http'
-import { authenticateAdmin, adminUserResponse, recordFailedLogin, setSessionCookies, loginIsRateLimited } from '../../server/auth.js'
-import { hasAllowedOrigin, readJson, requestIp, requireJson, sendJson } from '../../server/http.js'
+import { authenticateAdmin, adminUserResponse, recordFailedLogin, setSessionCookies, loginIsRateLimited } from '../auth.js'
+import { hasAllowedOrigin, readJson, requestIp, requireJson, sendJson } from '../http.js'
 
 function statusOf(error: unknown) {
   if (typeof error === 'object' && error !== null && 'status' in error && typeof error.status === 'number') {
@@ -74,3 +74,4 @@ export default async function handler(request: IncomingMessage, response: Server
     sendJson(response, 401, { error: 'Invalid email or password, or this account is not an administrator.' })
   }
 }
+

@@ -1,7 +1,7 @@
 import type { IncomingMessage, ServerResponse } from 'node:http'
-import { registerUser } from '../../server/auth.js'
-import { hasAllowedOrigin, readJson, requireJson, sendJson } from '../../server/http.js'
-import { validateRegistrationInput } from '../../server/registration.js'
+import { registerUser } from '../auth.js'
+import { hasAllowedOrigin, readJson, requireJson, sendJson } from '../http.js'
+import { validateRegistrationInput } from '../registration.js'
 
 export default async function handler(request: IncomingMessage, response: ServerResponse) {
   response.setHeader('Cache-Control', 'no-store')
@@ -37,3 +37,4 @@ export default async function handler(request: IncomingMessage, response: Server
     sendJson(response, 502, { error: 'Unable to register right now. Please try again later.' })
   }
 }
+

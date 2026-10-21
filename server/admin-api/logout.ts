@@ -1,6 +1,6 @@
 import type { IncomingMessage, ServerResponse } from 'node:http'
-import { clearSessionCookies, verifyAdminSessionOrRespond } from '../../server/auth.js'
-import { hasAllowedOrigin, requireJson, sendJson } from '../../server/http.js'
+import { clearSessionCookies, verifyAdminSessionOrRespond } from '../auth.js'
+import { hasAllowedOrigin, requireJson, sendJson } from '../http.js'
 
 export default async function handler(request: IncomingMessage, response: ServerResponse) {
   if (!await verifyAdminSessionOrRespond(request, response)) return
@@ -20,3 +20,4 @@ export default async function handler(request: IncomingMessage, response: Server
   clearSessionCookies(response)
   sendJson(response, 200, { success: true })
 }
+

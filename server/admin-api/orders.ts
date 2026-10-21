@@ -2,10 +2,10 @@ import type { IncomingMessage, ServerResponse } from "node:http";
 import {
   getAdminSupabaseClient,
   verifyAdminSessionOrRespond,
-} from "../../server/auth.js";
-import { sendJson, queryParam } from "../../server/http.js";
-import { retryPendingOrderNotifications } from "../../server/notifications.js";
-import { getServiceSupabaseClient } from "../../server/supabase.js";
+} from "../auth.js";
+import { sendJson, queryParam } from "../http.js";
+import { retryPendingOrderNotifications } from "../notifications.js";
+import { getServiceSupabaseClient } from "../supabase.js";
 
 export default async function handler(
   request: IncomingMessage,
@@ -54,3 +54,4 @@ export default async function handler(
     sendJson(response, 502, { error: "Unable to load orders." });
   }
 }
+

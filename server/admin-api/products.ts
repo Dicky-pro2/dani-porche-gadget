@@ -1,7 +1,7 @@
 import type { IncomingMessage, ServerResponse } from 'node:http'
-import { getAdminSupabaseClient, verifyAdminSessionOrRespond } from '../../server/auth.js'
-import { sendJson } from '../../server/http.js'
-import { listProductDocuments } from '../../server/products.js'
+import { getAdminSupabaseClient, verifyAdminSessionOrRespond } from '../auth.js'
+import { sendJson } from '../http.js'
+import { listProductDocuments } from '../products.js'
 
 export default async function handler(request: IncomingMessage, response: ServerResponse) {
   response.setHeader('Cache-Control', 'no-store')
@@ -20,3 +20,4 @@ export default async function handler(request: IncomingMessage, response: Server
     sendJson(response, 502, { error: 'Unable to load products.' })
   }
 }
+

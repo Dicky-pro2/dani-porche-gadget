@@ -1,8 +1,8 @@
 import { randomUUID } from 'node:crypto'
 import { Buffer } from 'node:buffer'
 import type { IncomingMessage, ServerResponse } from 'node:http'
-import { getAdminSupabaseClient, verifyAdminSessionOrRespond } from '../../server/auth.js'
-import { hasAllowedOrigin, sendJson } from '../../server/http.js'
+import { getAdminSupabaseClient, verifyAdminSessionOrRespond } from '../auth.js'
+import { hasAllowedOrigin, sendJson } from '../http.js'
 
 const maxFileBytes = 4 * 1024 * 1024
 const storageBucket = 'product-images'
@@ -97,3 +97,4 @@ export default async function handler(request: IncomingMessage, response: Server
     sendJson(response, 502, { error: 'Unable to upload image.' })
   }
 }
+

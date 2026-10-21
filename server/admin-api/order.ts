@@ -2,17 +2,17 @@ import type { IncomingMessage, ServerResponse } from "node:http";
 import {
   getAdminSupabaseClient,
   verifyAdminSessionOrRespond,
-} from "../../server/auth.js";
+} from "../auth.js";
 import {
   hasAllowedOrigin,
   queryParam,
   readJson,
   requireJson,
   sendJson,
-} from "../../server/http.js";
-import { notifyAdminOrder } from "../../server/notifications.js";
-import type { OrderRow } from "../../server/orders.js";
-import { getServiceSupabaseClient } from "../../server/supabase.js";
+} from "../http.js";
+import { notifyAdminOrder } from "../notifications.js";
+import type { OrderRow } from "../orders.js";
+import { getServiceSupabaseClient } from "../supabase.js";
 
 export default async function handler(
   request: IncomingMessage,
@@ -97,3 +97,4 @@ export default async function handler(
     sendJson(response, 502, { error: "Unable to update this order." });
   }
 }
+

@@ -1,6 +1,6 @@
 import type { IncomingMessage, ServerResponse } from 'node:http'
-import { adminUserResponse, verifyAdminSessionOrRespond } from '../../server/auth.js'
-import { sendJson } from '../../server/http.js'
+import { adminUserResponse, verifyAdminSessionOrRespond } from '../auth.js'
+import { sendJson } from '../http.js'
 
 export default async function handler(request: IncomingMessage, response: ServerResponse) {
   const session = await verifyAdminSessionOrRespond(request, response)
@@ -12,3 +12,4 @@ export default async function handler(request: IncomingMessage, response: Server
   }
   sendJson(response, 200, { user: adminUserResponse(session.user) })
 }
+

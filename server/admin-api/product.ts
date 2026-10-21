@@ -1,8 +1,8 @@
 import type { IncomingMessage, ServerResponse } from 'node:http'
-import { getAdminSupabaseClient, verifyAdminSessionOrRespond } from '../../server/auth.js'
-import { hasAllowedOrigin, queryParam, readJson, requireJson, sendJson } from '../../server/http.js'
-import { createProduct, deleteProduct, getNextProductReference, getProductById, hasProductSlug, updateProduct } from '../../server/products.js'
-import { validateProductInput } from '../../server/validate.js'
+import { getAdminSupabaseClient, verifyAdminSessionOrRespond } from '../auth.js'
+import { hasAllowedOrigin, queryParam, readJson, requireJson, sendJson } from '../http.js'
+import { createProduct, deleteProduct, getNextProductReference, getProductById, hasProductSlug, updateProduct } from '../products.js'
+import { validateProductInput } from '../validate.js'
 
 function isUniqueViolation(error: unknown) {
   return typeof error === 'object' && error !== null && 'code' in error && error.code === '23505'
@@ -72,3 +72,4 @@ export default async function handler(request: IncomingMessage, response: Server
     sendJson(response, 502, { error: 'Unable to save product.' })
   }
 }
+
