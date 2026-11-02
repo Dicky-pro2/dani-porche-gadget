@@ -14,7 +14,7 @@ export function formatPrice(price: number | null) {
 }
 
 export function stockLabel(stock: number) {
-  if (stock === 0) return "Out of stock";
+  if (stock < 1) return "Out of stock";
   if (stock <= 3) return "Low stock";
   return "In stock";
 }

@@ -56,10 +56,10 @@ export function AddToCartButton({
           ? "Price unavailable"
           : product.stock < 1
             ? "Out of stock"
-            : exceedsStock
-              ? `Only ${product.stock} available`
-              : requiresOption
-                ? "Choose option above"
+            : requiresOption
+              ? compact ? "Choose option above" : "Choose an option"
+              : exceedsStock
+                ? `Only ${product.stock} available`
                 : "Add to cart"}
       </button>
       <span className="cart-action-notice" role="status" aria-live="polite">

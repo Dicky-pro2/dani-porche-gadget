@@ -84,7 +84,11 @@ export function ProductDetailsPage() {
                 value={variant}
                 onChange={(event) => setVariant(event.target.value)}
               >
-                <option value="">Choose an option (optional)</option>
+                <option value="">
+                  {product.colors.length
+                    ? "Choose an option (required)"
+                    : "No options available"}
+                </option>
                 {product.colors.map((color) => (
                   <option key={color} value={color}>
                     {color}
