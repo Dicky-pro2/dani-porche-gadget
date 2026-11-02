@@ -8,7 +8,7 @@
   "rewrites": [
     {
       "source": "/api/admin/:path*",
-      "destination": "/api/_admin?__dispatch=:path*"
+      "destination": "/api/admin-router?__dispatch=:path*"
     },
     { "source": "/sitemap.xml", "destination": "/api/sitemap" },
     { "source": "/((?!api/).*)", "destination": "/index.html" }
