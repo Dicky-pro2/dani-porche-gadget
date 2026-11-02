@@ -5,7 +5,7 @@ import type { Database } from "./database.types.js";
 type ProductRow = Database["public"]["Tables"]["dpg_products"]["Row"];
 type ProductInput = Omit<Product, "id" | "createdAt" | "updatedAt">;
 
-function mapProduct(row: ProductRow) {
+function mapProduct(row: ProductRow, availableStock = false) {
   return {
     id: row.id,
     slug: row.slug,
@@ -19,7 +19,11 @@ function mapProduct(row: ProductRow) {
     colors: row.colors,
     specs: row.specs,
     price: row.price,
-    stock: Math.max(0, row.stock - row.reserved_stock),
+    // Admin forms edit physical stock. Storefronts use stock minus units
+    // already reserved by pending orders so customers cannot oversell.
+    stock: availableStock
+      ? Math.max(0, row.stock - row.reserved_stock)
+      : row.stock,
     isPublished: row.is_published,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
@@ -55,7 +59,7 @@ export async function listProductDocuments(
   if (publishedOnly) query = query.eq("is_published", true);
   const { data, error } = await query;
   if (error) throw error;
-  return data.map(mapProduct);
+  return data.map((row) => mapProduct(row, publishedOnly));
 }
 
 export async function getPublishedProductBySlug(
@@ -69,7 +73,7 @@ export async function getPublishedProductBySlug(
     .eq("is_published", true)
     .maybeSingle();
   if (error) throw error;
-  return data ? mapProduct(data) : null;
+  return data ? mapProduct(data, true) : null;
 }
 
 export async function hasProductSlug(
