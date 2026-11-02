@@ -10,7 +10,7 @@ export function AdminAuthProvider({ children }: PropsWithChildren) {
     let active = true
     getAdminSession()
       .then((user) => {
-        if (active) setUserEmail(user.email)
+        if (active) setUserEmail(user?.email ?? null)
       })
       .catch(() => {
         if (active) setUserEmail(null)

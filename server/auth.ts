@@ -37,7 +37,7 @@ export async function registerUser(email: string, password: string) {
   if (error) throw error
 }
 
-async function verifyAdminSession(request: IncomingMessage, response: ServerResponse) {
+export async function verifyAdminSession(request: IncomingMessage, response: ServerResponse) {
   const accessToken = getSessionToken(request)
   const refreshToken = getRefreshToken(request)
   if (!accessToken && !refreshToken) return null

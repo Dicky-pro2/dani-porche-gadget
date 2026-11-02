@@ -31,8 +31,9 @@ async function apiRequest(url: string, init?: RequestInit) {
   return body
 }
 
-export async function getAdminSession() {
+export async function getAdminSession(): Promise<AdminUser | null> {
   const body = await apiRequest('/api/admin/session')
+  if (body.user === null) return null
   if (!body.user || typeof body.user !== 'object' || !('email' in body.user) || typeof body.user.email !== 'string') {
     throw new Error('The server returned an invalid session.')
   }
